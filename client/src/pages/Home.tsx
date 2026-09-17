@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   ArrowRight,
@@ -128,6 +128,14 @@ function Home() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState("");
+  const [hasScrolled, setHasScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setHasScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const visibleProducts = useMemo(() => {
     return products.filter((product) => {
@@ -146,7 +154,7 @@ function Home() {
 
   return (
     <div className="app-shell">
-      <header className="topbar">
+      <header className={`topbar ${hasScrolled ? "is-scrolled" : ""}`}>
         <div className="topbar-inner">
           <button className="brand-button" onClick={() => setActiveTab("home")}><AppMark /></button>
           <nav className="topnav" aria-label="主导航">
@@ -178,7 +186,7 @@ function Home() {
             </div>
             <div className="hero-visual">
               <img src={image.hero} alt="白色丝带礼盒" />
-              <div className="hero-note"><Sparkles size={15} /><span>今日编辑推荐</span><strong>一份温柔的开场</strong></div>
+              <div className="hero-note"><Sparkles size={15} /><span>今日编辑推荐</span><strong>一份温柔的开场</strong><small>轻触礼盒，开始选礼</small></div>
               <div className="hero-orbit orbit-one" />
               <div className="hero-orbit orbit-two" />
             </div>
@@ -222,7 +230,7 @@ function Home() {
         <main className="mine-page section-wrap"><div className="mine-card"><div className="mine-head"><div className="mine-avatar">L</div><div><span className="eyebrow">LIYU MEMBER</span><h1>你好，<em>林小姐。</em></h1><p>愿每一份礼物，都替你把话说得更好。</p></div><button className="icon-button" onClick={() => notifySoon("会员设置已预留")}><ChevronRight size={18} /></button></div><div className="mine-stats"><div><strong>06</strong><span>送出的礼物</span></div><div><strong>03</strong><span>收藏的心意</span></div><div><strong>02</strong><span>收到的礼物</span></div></div><div className="mine-links">{[{ icon: Package, title: "礼物记录", text: "查看送出与收到的每一份心意" }, { icon: Heart, title: "我的收藏", text: "把喜欢留给下一次恰到好处" }, { icon: Star, title: "专属礼单", text: "根据你的偏好，持续为你挑选" }].map((item) => { const Icon = item.icon; return <button key={item.title} onClick={() => notifySoon(item.title)}><span className="mine-link-icon"><Icon size={18} /></span><span><strong>{item.title}</strong><small>{item.text}</small></span><ChevronRight size={16} /></button>; })}</div></div></main>
       )}
 
-      <footer className="bottom-nav"><button className={activeTab === "home" ? "active" : ""} onClick={() => setActiveTab("home")}><Sparkles size={18} /><span>选礼</span></button><button className={activeTab === "gifts" ? "active" : ""} onClick={goToGifts}><Plus size={18} /><span>礼物库</span></button><button className={activeTab === "mine" ? "active" : ""} onClick={() => setActiveTab("mine")}><UserRound size={18} /><span>我的</span></button></footer>
+      <footer className="bottom-nav"><button className={activeTab === "home" ? "active" : ""} onClick={() => { setActiveTab("home"); window.scrollTo({ top: 0, behavior: "smooth" }); }}><span className="bottom-nav-icon"><Sparkles size={18} /></span><span>选礼</span></button><button className={activeTab === "gifts" ? "active" : ""} onClick={goToGifts}><span className="bottom-nav-icon"><Plus size={18} /></span><span>礼物库</span></button><button className={activeTab === "mine" ? "active" : ""} onClick={() => setActiveTab("mine")}><span className="bottom-nav-icon"><UserRound size={18} /></span><span>我的</span></button></footer>
 
       {selectedProduct && <div className="modal-backdrop" onClick={() => setSelectedProduct(null)}><div className="product-sheet" onClick={(event) => event.stopPropagation()}><button className="sheet-close" onClick={() => setSelectedProduct(null)}><X size={18} /></button><div className="sheet-image"><img src={selectedProduct.image} alt={selectedProduct.title} /></div><div className="sheet-copy"><span className="eyebrow">{selectedProduct.category} · {selectedProduct.label}</span><h2>{selectedProduct.title}</h2><p className="sheet-subtitle">{selectedProduct.subtitle}</p><div className="sheet-divider" /><p className="sheet-description">一份经过认真挑选的礼物，适合被放进每一种不必隆重、但值得被记住的时刻。支持附上 80 字以内手写感祝福卡。</p><div className="sheet-info"><span>预计 2–3 日送达</span><span>精美礼盒包装</span></div><div className="sheet-bottom"><strong>{selectedProduct.price}</strong><button className="primary-button" onClick={() => { toast.success("已加入礼物清单", { description: "下一步可以为它写下祝福" }); setSelectedProduct(null); }}>选这份礼物 <ArrowRight size={16} /></button></div></div></div></div>}
     </div>
