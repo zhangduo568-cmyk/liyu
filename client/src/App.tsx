@@ -3,11 +3,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import Admin from "./pages/Admin";
 import Home from "./pages/Home";
 
 function Router() {
   return (
     <Switch>
+      <Route path="/admin" component={Admin} />
       <Route path="/" component={Home} />
       <Route component={Home} />
     </Switch>
@@ -28,4 +30,3 @@ function App() {
 }
 
 export default App;
-
